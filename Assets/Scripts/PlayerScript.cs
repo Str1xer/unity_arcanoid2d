@@ -78,6 +78,10 @@ public class PlayerScript : MonoBehaviour
         CreateBlocks(greenPrefab, xMax, yMax, 1+level, 12);
         CreateBlocks(yellowPrefab, xMax, yMax, 2+level, 15);
         CreateBalls();
+        if (gameData.resetOnStart)
+        {
+            gameData.Reset();
+        }
     }
 
     public void BallDestroyed()
@@ -91,6 +95,9 @@ public class PlayerScript : MonoBehaviour
         }
         else
         {
+            // Проверка и запись нового рекорда. Если значение в топ 5, то возвращает True.
+            gameData.NewResult(gameData.points);
+
             gameData.Reset();
             SceneManager.LoadScene("MainScene");
         }
@@ -129,6 +136,11 @@ public class PlayerScript : MonoBehaviour
                 gameData.level++;
             SceneManager.LoadScene("MainScene");
         }
+    }
+
+    public void AddPoint(int points)
+    {
+        gameData.points += points;
     }
 
     void SetMusic()
