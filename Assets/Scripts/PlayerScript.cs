@@ -74,10 +74,10 @@ public class PlayerScript : MonoBehaviour
         SetBackground();
         var yMax = 4.3f;
         var xMax = 5.5f;
-        CreateBlocks(bluePrefab, xMax, yMax, 1, 8);
-        CreateBlocks(redPrefab, xMax, yMax, 1, 10);
-        CreateBlocks(greenPrefab, xMax, yMax, 10, 12);
-        CreateBlocks(yellowPrefab, xMax, yMax, 1, 15);
+        CreateBlocks(bluePrefab, xMax, yMax, level, 8);
+        CreateBlocks(redPrefab, xMax, yMax, 1 + level, 10);
+        CreateBlocks(greenPrefab, xMax, yMax, 1 + level, 12);
+        CreateBlocks(yellowPrefab, xMax, yMax, 2 + level, 15);
         CreateBalls();
         if (gameData.resetOnStart)
         {
