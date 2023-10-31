@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.TextCore.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,6 +9,20 @@ using UnityEngine.UIElements;
 [CreateAssetMenu(fileName = "GameData", menuName = "Game Data", order = 51)]
 public class GameDataScript : ScriptableObject
 {
+    [Serializable]
+    public class Record
+    {
+        public string playerName;
+        public int recordValue;
+    }
+
+    [Serializable]
+    public class SerializableList<T>
+    {
+        public List<T> list;
+    }
+
+    public string username = "";
     public bool resetOnStart;
     public bool music = true;
     public bool sound = true;
@@ -15,7 +30,7 @@ public class GameDataScript : ScriptableObject
     public int balls = 6;
     public int points = 0;
     public int pointsToBall = 0;
-    public List<int> bestResults = new List<int>();
+    public SerializableList<Record> bestResults = new SerializableList<Record>();
 
     public GameObject baseBonus;
     public GameObject expandBonus;
@@ -87,21 +102,26 @@ public class GameDataScript : ScriptableObject
         points = 0;
         pointsToBall = 0;
         if (resetOnStart)
-            bestResults = new List<int>();
+            bestResults = new SerializableList<Record>();
     }
 
     public bool NewResult(int points)
     {
         bool cond = false;
 
-        if (bestResults.Count < 5 || points > bestResults[4])
+        if (bestResults.list.Count < 5 || points > bestResults.list[4].recordValue)
         {
             cond = true;
-            bestResults.Add(points);
-            bestResults.Sort();
-            bestResults.Reverse();
-            if (bestResults.Count > 5)
-                bestResults.RemoveAt(5);
+            Record record = new Record();
+            record.playerName = username;
+            record.recordValue = points;
+
+            bestResults.list.Add(record);
+
+            bestResults.list = bestResults.list.OrderBy(x => x.recordValue).ToList();
+            bestResults.list.Reverse();
+            if (bestResults.list.Count > 5)
+                bestResults.list.RemoveAt(5);
         }
 
         return cond;
@@ -115,7 +135,7 @@ public class GameDataScript : ScriptableObject
         PlayerPrefs.SetInt("pointsToBall", pointsToBall);
         PlayerPrefs.SetInt("music", music ? 1 : 0);
         PlayerPrefs.SetInt("sound", sound ? 1 : 0);
-        PlayerPrefs.SetString("bestResults", String.Join(",", bestResults));
+        PlayerPrefs.SetString("bestResults", JsonUtility.ToJson(bestResults));
     }
 
     public void Load()
@@ -126,19 +146,7 @@ public class GameDataScript : ScriptableObject
         pointsToBall = PlayerPrefs.GetInt("pointsToBall", 0);
         music = PlayerPrefs.GetInt("music", 1) == 1;
         sound = PlayerPrefs.GetInt("sound", 1) == 1;
-        try
-        {
-            bestResults = new List<int>();
-            string[] temp = PlayerPrefs.GetString("bestResults").Split(',');
-            for (int i = 0; i < temp.Length; i++)
-            {
-                bestResults.Add(Int32.Parse(temp[i]));
-            }
-            bestResults.Sort();
-        }
-        catch
-        {
-            Debug.Log("Records Empty");
-        }
+
+        bestResults = JsonUtility.FromJson<SerializableList<Record>>(PlayerPrefs.GetString("bestResults"));
     }
 }
