@@ -16,7 +16,13 @@ MonoBehaviour:
   music: 1
   sound: 1
   level: 1
-  balls: 6
-  points: 0
-  pointsToBall: 0
-  bestResults: 
+  balls: 4
+  points: 180
+  pointsToBall: 180
+  bestResults: 5a000000
+  baseBonus: {fileID: 3319016845373472779, guid: 4e1daa09d5ab97e4ca7149430b677935, type: 3}
+  expandBonus: {fileID: 3558168274593426808, guid: e48801c7d6d9f82488f7653848bb9453, type: 3}
+  shrinkBonus: {fileID: 0}
+  stickyBonus: {fileID: 0}
+  simpleBonus: {fileID: 0}
+  playerSizeChanges: 0

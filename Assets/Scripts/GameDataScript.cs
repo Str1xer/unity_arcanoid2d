@@ -17,6 +17,69 @@ public class GameDataScript : ScriptableObject
     public int pointsToBall = 0;
     public List<int> bestResults = new List<int>();
 
+    public GameObject baseBonus;
+    public GameObject expandBonus;
+    public GameObject shrinkBonus;
+    public GameObject stickyBonus;
+    public GameObject simpleBonus;
+
+    // Некоторое хранение изменений размеров пользователя 
+    // При увеличении размера счетчик увеличивается на 1
+    // При уменьшении размера счетчик уменьшается на 1
+    public int playerSizeChanges = 0;
+
+    public void ResetPlayerSize() {
+        playerSizeChanges = 0;
+
+        var playerObj = GameObject.FindGameObjectWithTag("Player");
+
+        playerObj.transform.localScale = new Vector3(2, 2, 1);
+    }
+
+    // Возвращает бонус
+    public GameObject Bonus()
+    {
+
+        // Define the probabilities of different cases
+        float baseBonusProb = 0;
+        float expandBonusProb = 0.5f;
+        float shrinkBonusProb = 0.5f;
+        float stickyBonusProb = 0;
+        // вероятность simpleBonusProb будет высчитана по формуле:
+        // 1 - сумма всех остальных
+
+
+        // Generate a random value between 0 and 1
+        float randomValue = UnityEngine.Random.Range(0f, 1f);
+
+        GameObject result;
+
+        // Determine the selected case based on the random value
+        if (randomValue < baseBonusProb)
+        {
+            result = baseBonus;
+        }
+        else if (randomValue < baseBonusProb + expandBonusProb)
+        {
+            result = expandBonus;
+        }
+        else if (randomValue < baseBonusProb + expandBonusProb + shrinkBonusProb)
+        {
+            result = shrinkBonus;
+        }
+        else if (randomValue < baseBonusProb + expandBonusProb + shrinkBonusProb + stickyBonusProb)
+        {
+            result = stickyBonus;
+        }
+        else
+        {
+            result = simpleBonus;
+        }
+
+        return result;
+    }
+
+
     public void Reset()
     {
         level = 1;

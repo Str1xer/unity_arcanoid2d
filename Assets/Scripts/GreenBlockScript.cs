@@ -10,7 +10,8 @@ public class GreenBlockScript : MonoBehaviour
     public int hitToDestroy;
     public int points;
     GameObject playerObj;
-    public GameObject[] bonusPrefabs;
+
+    public GameDataScript gameData;
 
     void Start()
     {
@@ -29,7 +30,10 @@ public class GreenBlockScript : MonoBehaviour
         {
             playerObj.GetComponent<PlayerScript>().BlockDestroyed(points);
             Destroy(gameObject);
-            Instantiate(bonusPrefabs[Random.Range(0, bonusPrefabs.Length)], this.transform.position, Quaternion.identity);
+
+            var bonus = gameData.Bonus();
+
+            Instantiate(bonus, this.transform.position, Quaternion.identity);
         }
         else if (textComponent != null)
             textComponent.text = hitToDestroy.ToString();
