@@ -5,6 +5,7 @@ using UnityEngine.Rendering;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class PlayerScript : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class PlayerScript : MonoBehaviour
     [Range(1, maxLevel)]
     public int level = 1;
     public float ballVelocityMult = 0.02f;
+    public Canvas mainMenu;
     public GameObject bluePrefab;
     public GameObject redPrefab;
     public GameObject greenPrefab;
@@ -25,6 +27,8 @@ public class PlayerScript : MonoBehaviour
     static bool gameStarted = false;
     private int ballsCount = 0;
     private int blocksCount = 0;
+    private bool showGUI = false;
+    public InputField inputField;
 
     private void SetBackground()
     {
@@ -163,10 +167,12 @@ public class PlayerScript : MonoBehaviour
     void Start()
     {
         audioSrc = Camera.main.GetComponent<AudioSource>();
-        Cursor.visible = false;
+        Time.timeScale = 0;
+        inputField.Select();
+        
+        mainMenu.sortingOrder = 1;
         if (!gameStarted)
         {
-            gameStarted = true;
             if (gameData.resetOnStart)
                 gameData.Load();
         }
@@ -174,9 +180,9 @@ public class PlayerScript : MonoBehaviour
         SetMusic();
         StartLevel();
     }
-
     void Update()
     {
+        
         if (Time.timeScale > 0)
         {
             var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -185,33 +191,42 @@ public class PlayerScript : MonoBehaviour
             transform.position = pos;
         }
             
-        if (Input.GetKeyDown(KeyCode.M))
+        if (Input.GetKeyDown(KeyCode.M) && gameStarted)
         {
             gameData.music = !gameData.music;
             SetMusic();
         }
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S) && gameStarted)
         {
             gameData.sound = !gameData.sound;
         }
-        if (Input.GetButtonDown("Cancel"))
+        if (Input.GetButtonDown("Cancel") && gameStarted)
         {
             if(Time.timeScale > 0)
                 Time.timeScale = 0;
             else
                 Time.timeScale = 1;
         }
-        if (Input.GetKeyDown(KeyCode.N))
+        if (Input.GetKeyDown(KeyCode.N) && gameStarted)
         {
             gameData.Reset();
             SceneManager.LoadScene("MainScene");
         }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Application.Quit();
-            #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-            #endif
+            Cursor.visible = !Cursor.visible;
+            gameStarted = !gameStarted;
+            mainMenu.sortingOrder = mainMenu.sortingOrder *-1;
+            if (Time.timeScale > 0)
+            {
+                this.showGUI = false;
+                Time.timeScale = 0;
+            }
+            else
+            {
+                this.showGUI = true;
+                Time.timeScale = 1;
+            }
         }
     }
 
@@ -227,18 +242,22 @@ public class PlayerScript : MonoBehaviour
 
     private void OnGUI()
     {
-        GUI.Label(new Rect(0 + Mathf.Floor((Screen.width - Screen.height/3*4)/2) + 5, 2, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height/3*4)/2), 100), string.Format("<color=yellow><size=18>Level <b>{0}</b>    Balls <b>{1}</b>" + "   Score <b>{2}</b></size></color>", gameData.level, gameData.balls, gameData.points));
-        GUIStyle style = new GUIStyle();
-        style.alignment = TextAnchor.UpperRight;
-        GUI.Label(new Rect(5, 6, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height/3*4)/2), 100),
-        string.Format(
-            "<color=yellow><size=12><color=white>Space</color>-pause {0}" +
-             " <color=white>N</color>-new" +
-             " <color=white>J</color>-jump" +
-             " <color=white>M</color>-music {1}" +
-             " <color=white>S</color>-sound {2}" +
-             " <color=white>Esc</color>-exit</size></color>",
-             OnOff(Time.timeScale > 0), OnOff(!gameData.music),
-             OnOff(!gameData.sound)), style);
+        if (showGUI)
+        {
+            GUI.Label(new Rect(0 + Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2) + 5, 2, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2), 100), string.Format("<color=yellow><size=18>Level <b>{0}</b>    Balls <b>{1}</b>" + "   Score <b>{2}</b></size></color>", gameData.level, gameData.balls, gameData.points));
+
+            GUIStyle style = new GUIStyle();
+            style.alignment = TextAnchor.UpperRight;
+            GUI.Label(new Rect(5, 6, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2), 100),
+                string.Format(
+                    "<color=yellow><size=12><color=white>Space</color>-pause {0}" +
+                    " <color=white>N</color>-new" +
+                    " <color=white>J</color>-jump" +
+                    " <color=white>M</color>-music {1}" +
+                    " <color=white>S</color>-sound {2}" +
+                    " <color=white>Esc</color>-menu</size></color>",
+                    OnOff(Time.timeScale > 0), OnOff(!gameData.music),
+                    OnOff(!gameData.sound)), style);
+        }
     }
 }
