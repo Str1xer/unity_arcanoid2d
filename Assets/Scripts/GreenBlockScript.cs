@@ -25,17 +25,20 @@ public class GreenBlockScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        hitToDestroy--;
-        if (hitToDestroy == 0)
+        if (collision.gameObject.tag != "Block")
         {
-            playerObj.GetComponent<PlayerScript>().BlockDestroyed(points);
-            Destroy(gameObject);
+            hitToDestroy--;
+            if (hitToDestroy == 0)
+            {
+                playerObj.GetComponent<PlayerScript>().BlockDestroyed(points);
+                Destroy(gameObject);
 
-            var bonus = gameData.Bonus();
+                var bonus = gameData.Bonus();
 
-            Instantiate(bonus, this.transform.position, Quaternion.identity);
-        }
-        else if (textComponent != null)
-            textComponent.text = hitToDestroy.ToString();
+                Instantiate(bonus, this.transform.position, Quaternion.identity);
+            }
+            else if (textComponent != null)
+                textComponent.text = hitToDestroy.ToString();
+        } 
     }
 }
