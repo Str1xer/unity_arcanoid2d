@@ -28,5 +28,7 @@ MonoBehaviour:
   expandBonus: {fileID: 3558168274593426808, guid: e48801c7d6d9f82488f7653848bb9453, type: 3}
   shrinkBonus: {fileID: 3688647987665982742, guid: 8e31850db5e34c74c9dbb2c9051819d5, type: 3}
   stickyBonus: {fileID: 2895564744784290362, guid: 993923a90a144ec488fd580da398f9e1, type: 3}
-  simpleBonus: {fileID: 0}
+  simpleBonus: {fileID: 1425782673015623757, guid: 0276fd48e5a2d3f4e828ae9a5ea2c3c5, type: 3}
   playerSizeChanges: 0
+  isPlayerSticky: 0
+  hasStickyPlayerHoldBall: 0

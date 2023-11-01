@@ -30,18 +30,21 @@ public class YellowBlockScript : MonoBehaviour
         rb.velocity = initVelocity;
     }
 
+    private void FixedUpdate()
+    {
+        rb.velocity = initVelocity;
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
 
         if (collision.gameObject.tag == "Block" || collision.gameObject.tag == "Wall")
         {
             initVelocity = -initVelocity;
-            rb.velocity = initVelocity;
         }
 
         if (collision.gameObject.tag != "Block" && collision.gameObject.tag != "Wall")
         {
-
             hitToDestroy--;
             if (hitToDestroy == 0)
             {

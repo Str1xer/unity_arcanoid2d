@@ -99,7 +99,7 @@ public class PlayerScript : MonoBehaviour
         }
         else
         {
-            // Проверка и запись нового рекорда. Если значение в топ 5, то возвращает True.
+            // Check recordin new record. If record in top 5, then return True.
             gameData.NewResult(gameData.points);
 
             gameData.Reset();
