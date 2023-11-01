@@ -22,6 +22,10 @@ public class BallScript : MonoBehaviour
         audioSrc = Camera.main.GetComponent<AudioSource>();
     }
 
+    private void setHasStickyBasllToFalse() {
+        gameData.hasStickyPlayerHoldBall = false;
+    }
+
     void Update()
     {
         if (rb.isKinematic) 
@@ -30,6 +34,11 @@ public class BallScript : MonoBehaviour
             {
                 rb.isKinematic = false;
                 rb.AddForce(ballInitialForce);
+                // Hach for case when we have already have a sticky ball
+                // and when we click and expect that ball will be thrown, 
+                // but because ball is close to player unity will trigger
+                // [OnCollisionEnter2D] and we will not throw a ball
+                Invoke("setHasStickyBasllToFalse", 0.5f);
             } 
             else
             {
@@ -60,6 +69,15 @@ public class BallScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        // Check if ball collided with player and
+        // we hava a sticky ball and we dont have 
+        // any sticky ball yet.
+        if (collision.gameObject.tag == "Player" && gameData.isPlayerSticky && !gameData.hasStickyPlayerHoldBall) {
+            rb.isKinematic = true;
+            gameData.hasStickyPlayerHoldBall = true;
+            rb.velocity = new Vector2(0, 0);
+
+        }
         if (gameData.sound)
             audioSrc.PlayOneShot(hitSound, 5);
     }

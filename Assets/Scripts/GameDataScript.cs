@@ -38,10 +38,24 @@ public class GameDataScript : ScriptableObject
     public GameObject stickyBonus;
     public GameObject simpleBonus;
 
-    // Некоторое хранение изменений размеров пользователя 
-    // При увеличении размера счетчик увеличивается на 1
-    // При уменьшении размера счетчик уменьшается на 1
+    // Counter of size changing
+    // Increasing when we multiply player size on 1.5
+    // Decreasing when we divide player size on 1.5
     public int playerSizeChanges = 0;
+
+
+    public bool isPlayerSticky = false;
+    public bool hasStickyPlayerHoldBall = false;
+
+    public void ResetStickyPlayer() {
+        isPlayerSticky = false;
+        hasStickyPlayerHoldBall = false;
+
+        var playerObj = GameObject.FindGameObjectWithTag("Player");
+
+        var spriteRenderer = playerObj.GetComponent<SpriteRenderer>();
+        spriteRenderer.color = Color.white;
+    }
 
     public void ResetPlayerSize() {
         playerSizeChanges = 0;
@@ -51,17 +65,17 @@ public class GameDataScript : ScriptableObject
         playerObj.transform.localScale = new Vector3(2, 2, 1);
     }
 
-    // Возвращает бонус
+    // Bonus for instantiating in GreenBlockScript
     public GameObject Bonus()
     {
 
         // Define the probabilities of different cases
-        float baseBonusProb = 0;
-        float expandBonusProb = 0.5f;
-        float shrinkBonusProb = 0.5f;
-        float stickyBonusProb = 0;
-        // вероятность simpleBonusProb будет высчитана по формуле:
-        // 1 - сумма всех остальных
+        float baseBonusProb = 0.4f;
+        float expandBonusProb = 0.2f;
+        float shrinkBonusProb = 0.2f;
+        float stickyBonusProb = 0.1f;
+        // Probability of simpleBonusProb is calculated:
+        // 1 - sum of all others probabilities
 
 
         // Generate a random value between 0 and 1

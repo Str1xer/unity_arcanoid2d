@@ -12,17 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 460d657ad54cbbd429e6a23ecbc87b66, type: 3}
   m_Name: GameData
   m_EditorClassIdentifier: 
+  username: 
   resetOnStart: 0
   music: 1
   sound: 1
   level: 1
-  balls: 4
-  points: 180
-  pointsToBall: 180
-  bestResults: 5a000000
+  balls: 6
+  points: 0
+  pointsToBall: 0
+  bestResults:
+    list:
+    - playerName: 
+      recordValue: 380
   baseBonus: {fileID: 3319016845373472779, guid: 4e1daa09d5ab97e4ca7149430b677935, type: 3}
   expandBonus: {fileID: 3558168274593426808, guid: e48801c7d6d9f82488f7653848bb9453, type: 3}
-  shrinkBonus: {fileID: 0}
-  stickyBonus: {fileID: 0}
+  shrinkBonus: {fileID: 3688647987665982742, guid: 8e31850db5e34c74c9dbb2c9051819d5, type: 3}
+  stickyBonus: {fileID: 2895564744784290362, guid: 993923a90a144ec488fd580da398f9e1, type: 3}
   simpleBonus: {fileID: 0}
   playerSizeChanges: 0

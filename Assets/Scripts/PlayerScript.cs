@@ -70,6 +70,7 @@ public class PlayerScript : MonoBehaviour
 
     private void StartLevel()
     {
+        gameData.ResetStickyPlayer();
         gameData.ResetPlayerSize();
         SetBackground();
         var yMax = 4.3f;
