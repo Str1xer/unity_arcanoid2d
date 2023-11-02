@@ -3,7 +3,15 @@ guid: 79d7f1ff6b275464c9390bd692ba3bd9
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - bluePrefab: {instanceID: 0}
+  - redPrefab: {instanceID: 0}
+  - greenPrefab: {instanceID: 0}
+  - yellowPrefab: {instanceID: 0}
+  - newYellowPrefab: {instanceID: 0}
+  - ballPrefab: {instanceID: 0}
+  - gameData: {instanceID: 0}
+  - pointSound: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

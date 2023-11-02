@@ -24,13 +24,17 @@ public class BlockScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        hitToDestroy--;
-        if (hitToDestroy == 0)
+        if (collision.gameObject.tag != "Block")
         {
-            playerObj.GetComponent<PlayerScript>().BlockDestroyed(points);
-            Destroy(gameObject);
+            hitToDestroy--;
+            if (hitToDestroy == 0)
+            {
+                playerObj.GetComponent<PlayerScript>().BlockDestroyed(points);
+                Destroy(gameObject);
+            }
+
+            else if (textComponent != null)
+                textComponent.text = hitToDestroy.ToString();
         }
-        else if (textComponent != null)
-            textComponent.text = hitToDestroy.ToString();
     }
 }
