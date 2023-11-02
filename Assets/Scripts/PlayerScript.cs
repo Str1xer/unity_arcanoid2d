@@ -172,10 +172,10 @@ public class PlayerScript : MonoBehaviour
             if (!gameStarted)
             {
                 gameStarted = !gameStarted;
-                ChangeMenuState();
                 StartLevel();
             }
-            
+            ChangeMenuState();
+
         }
         else
         {
@@ -204,10 +204,13 @@ public class PlayerScript : MonoBehaviour
             if (gameData.resetOnStart)
                 gameData.Load();
         }
-        Records.text = gameData.bestResults.list[0].playerName + gameData.bestResults.list[0].recordValue;
+        for(int i =0;i <5;i++)
+        {
+            Records.text += gameData.bestResults.list[0].playerName + gameData.bestResults.list[0].recordValue + '\n';
+        }
+       
         level = gameData.level;
         SetMusic();
-        StartLevel();
     }
     void Update()
     {
