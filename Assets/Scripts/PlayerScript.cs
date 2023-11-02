@@ -31,6 +31,7 @@ public class PlayerScript : MonoBehaviour
     private bool showGUI = false;
     public InputField inputField;
     public Text Records;
+    public Text NewRecord;
     private void SetBackground()
     {
         var bg = GameObject.Find("Background").GetComponent<Image>();
@@ -104,8 +105,10 @@ public class PlayerScript : MonoBehaviour
         else
         {
             // Check recordin new record. If record in top 5, then return True.
-            gameData.NewResult(gameData.points,inputField.text);
-
+            if(gameData.NewResult(gameData.points,inputField.text))
+                NewRecord.gameObject.SetActive(true);
+            Cursor.visible = true;
+            gameStarted = false;
             gameData.Reset();
             SceneManager.LoadScene("MainScene");
         }
@@ -167,6 +170,7 @@ public class PlayerScript : MonoBehaviour
     }
     public void OnStartButtonClick()
     {
+        NewRecord.gameObject.SetActive(false);
         if (!string.IsNullOrEmpty(inputField.text))
         {
             if (!gameStarted)
@@ -195,6 +199,7 @@ public class PlayerScript : MonoBehaviour
 
     void Start()
     {
+        NewRecord.gameObject.SetActive(false);
         audioSrc = Camera.main.GetComponent<AudioSource>();
         Time.timeScale = 0;
         inputField.Select();
