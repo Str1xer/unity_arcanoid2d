@@ -204,9 +204,9 @@ public class PlayerScript : MonoBehaviour
             if (gameData.resetOnStart)
                 gameData.Load();
         }
-        for(int i =0;i <5;i++)
+        for(int i =0; i < gameData.bestResults.list.Count; i++)
         {
-            Records.text += gameData.bestResults.list[0].playerName + gameData.bestResults.list[0].recordValue + '\n';
+            Records.text += gameData.bestResults.list[i].playerName + gameData.bestResults.list[i].recordValue + '\n';
         }
        
         level = gameData.level;
