@@ -56,13 +56,17 @@ public class BallScript : MonoBehaviour
                 v.Set(v.x + 0.1f, v.y - 0.1f);
             rb.velocity = v;
         }
+        if (!rb.isKinematic)
+            rb.velocity = rb.velocity.normalized*7;
+        Debug.Log(rb.velocity.x*rb.velocity.x + rb.velocity.y*rb.velocity.y);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        audioSrc.PlayOneShot(loseSound, 5);
+        
         if (gameData.sound)
-            playerObj.GetComponent<PlayerScript>().BallDestroyed();
+            audioSrc.PlayOneShot(loseSound, 5);
+        playerObj.GetComponent<PlayerScript>().BallDestroyed();
         Destroy(gameObject);
         Debug.Log("Game Over");
     }
