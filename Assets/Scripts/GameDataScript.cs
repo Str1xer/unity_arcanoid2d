@@ -119,7 +119,7 @@ public class GameDataScript : ScriptableObject
             bestResults = new SerializableList<Record>();
     }
 
-    public bool NewResult(int points)
+    public bool NewResult(int points,string userName)
     {
         bool cond = false;
 
@@ -127,7 +127,7 @@ public class GameDataScript : ScriptableObject
         {
             cond = true;
             Record record = new Record();
-            record.playerName = username;
+            record.playerName = userName;
             record.recordValue = points;
 
             bestResults.list.Add(record);

@@ -29,7 +29,7 @@ public class PlayerScript : MonoBehaviour
     private int blocksCount = 0;
     private bool showGUI = false;
     public InputField inputField;
-
+    public Text Records;
     private void SetBackground()
     {
         var bg = GameObject.Find("Background").GetComponent<Image>();
@@ -47,9 +47,9 @@ public class PlayerScript : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            for (int k  = 0; k < 20; k++)
+            for (int k = 0; k < 20; k++)
             {
-                var obj = Instantiate(prefab, new Vector3((Random.value * 2 - 1)* xMax, Random.value*yMax, 0), Quaternion.identity);
+                var obj = Instantiate(prefab, new Vector3((Random.value * 2 - 1) * xMax, Random.value * yMax, 0), Quaternion.identity);
                 if (obj.GetComponent<Collider2D>().OverlapCollider(contactFilter.NoFilter(), colliders) == 0)
                     break;
                 Destroy(obj);
@@ -63,12 +63,12 @@ public class PlayerScript : MonoBehaviour
         if (gameData.balls == 1)
             count = 1;
         ballsCount = count;
-        for (int i = 0;i < count;i++)
+        for (int i = 0; i < count; i++)
         {
             var obj = Instantiate(ballPrefab);
             var ball = obj.GetComponent<BallScript>();
-            ball.ballInitialForce += new Vector2(10*i, 0);
-            ball.ballInitialForce *= 1 + level*ballVelocityMult;
+            ball.ballInitialForce += new Vector2(10 * i, 0);
+            ball.ballInitialForce *= 1 + level * ballVelocityMult;
         }
     }
 
@@ -102,14 +102,14 @@ public class PlayerScript : MonoBehaviour
         else
         {
             // Проверка и запись нового рекорда. Если значение в топ 5, то возвращает True.
-            gameData.NewResult(gameData.points);
+            gameData.NewResult(gameData.points,inputField.text);
 
             gameData.Reset();
             SceneManager.LoadScene("MainScene");
         }
     }
 
-    int requiredPointsToBall { get { return 400 + (level - 1)*20; } }
+    int requiredPointsToBall { get { return 400 + (level - 1) * 20; } }
 
     IEnumerator BlockDestroyedCoroutine()
     {
@@ -159,9 +159,36 @@ public class PlayerScript : MonoBehaviour
 
     float clamp(float x, float max, float min)
     {
-        if (x>min && x<max) return x;
-        if (x<min) return min;
+        if (x > min && x < max) return x;
+        if (x < min) return min;
         return max;
+    }
+    public void OnStartButtonClick()
+    {
+        if (!string.IsNullOrEmpty(inputField.text))
+        {
+            if (!gameStarted)
+            {
+                gameStarted = !gameStarted;
+                ChangeMenuState();
+                StartLevel();
+            }
+            
+        }
+        else
+        {
+            inputField.placeholder.GetComponent<Text>().text = "Really enter name, please";
+            inputField.Select();
+        }
+
+    }
+    public void OnExitButtonClick()
+    {
+        Application.Quit();
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+
     }
 
     void Start()
@@ -169,20 +196,20 @@ public class PlayerScript : MonoBehaviour
         audioSrc = Camera.main.GetComponent<AudioSource>();
         Time.timeScale = 0;
         inputField.Select();
-        
         mainMenu.sortingOrder = 1;
         if (!gameStarted)
         {
             if (gameData.resetOnStart)
                 gameData.Load();
         }
+        Records.text = gameData.bestResults.list[0].playerName + gameData.bestResults.list[0].recordValue;
         level = gameData.level;
         SetMusic();
         StartLevel();
     }
     void Update()
     {
-        
+
         if (Time.timeScale > 0)
         {
             var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -190,7 +217,7 @@ public class PlayerScript : MonoBehaviour
             pos.x = clamp(mousePos.x, 6.6f, -6.6f);
             transform.position = pos;
         }
-            
+
         if (Input.GetKeyDown(KeyCode.M) && gameStarted)
         {
             gameData.music = !gameData.music;
@@ -202,7 +229,7 @@ public class PlayerScript : MonoBehaviour
         }
         if (Input.GetButtonDown("Cancel") && gameStarted)
         {
-            if(Time.timeScale > 0)
+            if (Time.timeScale > 0)
                 Time.timeScale = 0;
             else
                 Time.timeScale = 1;
@@ -212,21 +239,24 @@ public class PlayerScript : MonoBehaviour
             gameData.Reset();
             SceneManager.LoadScene("MainScene");
         }
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && gameStarted)
         {
-            Cursor.visible = !Cursor.visible;
-            gameStarted = !gameStarted;
-            mainMenu.sortingOrder = mainMenu.sortingOrder *-1;
-            if (Time.timeScale > 0)
-            {
-                this.showGUI = false;
-                Time.timeScale = 0;
-            }
-            else
-            {
-                this.showGUI = true;
-                Time.timeScale = 1;
-            }
+            ChangeMenuState();
+        }
+    }
+    public void ChangeMenuState()
+    {
+        Cursor.visible = !Cursor.visible;
+        mainMenu.sortingOrder = mainMenu.sortingOrder * -1;
+        if (Time.timeScale > 0)
+        {
+            this.showGUI = false;
+            Time.timeScale = 0;
+        }
+        else
+        {
+            this.showGUI = true;
+            Time.timeScale = 1;
         }
     }
 
