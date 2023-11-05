@@ -26,6 +26,7 @@ public class PlayerScript : MonoBehaviour
     AudioSource audioSrc;
     public AudioClip pointSound;
     static bool gameStarted = false;
+    static bool gamePaused = true;
     private int ballsCount = 0;
     private int blocksCount = 0;
     private bool showGUI = false;
@@ -78,15 +79,27 @@ public class PlayerScript : MonoBehaviour
     {
         gameData.ResetStickyPlayer();
         gameData.ResetPlayerSize();
+
+        gameStarted = true;
+
+        Debug.Log("Level started");
+
         SetBackground();
         var yMax = 4.3f;
         var xMax = 5.5f;
+
         CreateBlocks(bluePrefab, xMax, yMax, level, 8);
         CreateBlocks(redPrefab, xMax, yMax, 1 + level, 10);
         CreateBlocks(greenPrefab, xMax, yMax, 1 + level, 12);
         CreateBlocks(yellowPrefab, xMax, yMax, 2 + level, 15);
         CreateBlocks(SpecialYellowPrefab, xMax, yMax, 2 + level, 15);
         CreateBalls();
+
+        if (gameData.level > 1)
+        {
+            ChangeMenuState();
+        }
+
         if (gameData.resetOnStart)
         {
             gameData.Reset();
@@ -105,10 +118,11 @@ public class PlayerScript : MonoBehaviour
         else
         {
             // Check recordin new record. If record in top 5, then return True.
-            if(gameData.NewResult(gameData.points,inputField.text))
-                NewRecord.gameObject.SetActive(true);
             Cursor.visible = true;
+            if (gameData.NewResult(gameData.points, gameData.username))
+                NewRecord.gameObject.SetActive(true);  
             gameStarted = false;
+            gameData.username = "";
             gameData.Reset();
             SceneManager.LoadScene("MainScene");
         }
@@ -141,6 +155,7 @@ public class PlayerScript : MonoBehaviour
                 StartCoroutine(BlockDestroyedCoroutine());
 
         }
+
         if (blocksCount == 0)
         {
             if (level < maxLevel)
@@ -170,12 +185,17 @@ public class PlayerScript : MonoBehaviour
     }
     public void OnStartButtonClick()
     {
+        Debug.Log("Start from button");
+
         NewRecord.gameObject.SetActive(false);
         if (!string.IsNullOrEmpty(inputField.text))
         {
+            gameData.username = inputField.text;
+
             if (!gameStarted)
             {
-                gameStarted = !gameStarted;
+                gameStarted = true;
+                gamePaused = false;
                 StartLevel();
             }
             ChangeMenuState();
@@ -199,23 +219,34 @@ public class PlayerScript : MonoBehaviour
 
     void Start()
     {
+
+        Debug.Log("General Start");
+
         NewRecord.gameObject.SetActive(false);
         audioSrc = Camera.main.GetComponent<AudioSource>();
+   
         Time.timeScale = 0;
-        inputField.Select();
+
+        if (!string.IsNullOrEmpty(gameData.username))
+        {
+            inputField.text = gameData.username;
+        }
+
         mainMenu.sortingOrder = 1;
-        if (!gameStarted)
+
+        for (int i = 0; i < gameData.bestResults.list.Count; i++)
         {
-            if (gameData.resetOnStart)
-                gameData.Load();
+            Records.text += gameData.bestResults.list[i].playerName + " - " + gameData.bestResults.list[i].recordValue + '\n';
         }
-        for(int i =0; i < gameData.bestResults.list.Count; i++)
-        {
-            Records.text += gameData.bestResults.list[i].playerName + gameData.bestResults.list[i].recordValue + '\n';
-        }
-       
+
         level = gameData.level;
         SetMusic();
+
+        if (gameData.level > 1)
+        {
+            StartLevel();
+        }
+
     }
     void Update()
     {
@@ -228,43 +259,52 @@ public class PlayerScript : MonoBehaviour
             transform.position = pos;
         }
 
-        if (Input.GetKeyDown(KeyCode.M) && gameStarted)
+        if (Input.GetKeyDown(KeyCode.M) && gameStarted && !gamePaused)
         {
             gameData.music = !gameData.music;
             SetMusic();
         }
-        if (Input.GetKeyDown(KeyCode.S) && gameStarted)
+        if (Input.GetKeyDown(KeyCode.S) && gameStarted && !gamePaused)
         {
             gameData.sound = !gameData.sound;
         }
-        if (Input.GetButtonDown("Cancel") && gameStarted)
+        if (Input.GetButtonDown("Cancel") && gameStarted && !gamePaused)
         {
             if (Time.timeScale > 0)
                 Time.timeScale = 0;
             else
                 Time.timeScale = 1;
         }
-        if (Input.GetKeyDown(KeyCode.N) && gameStarted)
+        if (Input.GetKeyDown(KeyCode.N) && gameStarted && !gamePaused)
         {
+            gameStarted = false;
+            gameData.username = "";
             gameData.Reset();
             SceneManager.LoadScene("MainScene");
         }
         if (Input.GetKeyDown(KeyCode.Escape) && gameStarted)
         {
+            
             ChangeMenuState();
         }
     }
     public void ChangeMenuState()
     {
-        Cursor.visible = !Cursor.visible;
+
+        Debug.Log("Show Menu");
+
         mainMenu.sortingOrder = mainMenu.sortingOrder * -1;
         if (Time.timeScale > 0)
         {
+            gamePaused = true;
+            Cursor.visible = true;
             this.showGUI = false;
             Time.timeScale = 0;
         }
         else
         {
+            gamePaused = false;
+            Cursor.visible = false;
             this.showGUI = true;
             Time.timeScale = 1;
         }
@@ -284,7 +324,7 @@ public class PlayerScript : MonoBehaviour
     {
         if (showGUI)
         {
-            GUI.Label(new Rect(0 + Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2) + 5, 2, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2), 100), string.Format("<color=yellow><size=18>Level <b>{0}</b>    Balls <b>{1}</b>" + "   Score <b>{2}</b></size></color>", gameData.level, gameData.balls, gameData.points));
+            GUI.Label(new Rect(0 + Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2) + 5, 2, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2), 100), string.Format("<color=yellow><size=18>Player <b>{0}</b>    Level <b>{1}</b>    Balls <b>{2}</b>" + "   Score <b>{3}</b></size></color>", gameData.username, gameData.level, gameData.balls, gameData.points));
 
             GUIStyle style = new GUIStyle();
             style.alignment = TextAnchor.UpperRight;
