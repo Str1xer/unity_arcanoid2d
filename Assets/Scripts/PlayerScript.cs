@@ -228,7 +228,7 @@ public class PlayerScript : MonoBehaviour
 
         gameStarted = false;
         gameData.username = "";
-        this.StartTextButton.text = "Continue";
+        StartTextButton.text = "Start";
         gameData.Reset();
         SceneManager.LoadScene("MainScene");
 
