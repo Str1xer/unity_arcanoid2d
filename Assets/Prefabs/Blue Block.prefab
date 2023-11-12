@@ -307,5 +307,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textObject: {fileID: 4713041104906214466}
-  hitToDestroy: 30
+  hitToDestroy: 5
   points: 100

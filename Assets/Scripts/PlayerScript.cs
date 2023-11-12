@@ -5,6 +5,7 @@ using UnityEngine.Rendering;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class PlayerScript : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class PlayerScript : MonoBehaviour
     [Range(1, maxLevel)]
     public int level = 1;
     public float ballVelocityMult = 0.02f;
+    public Canvas mainMenu;
     public GameObject bluePrefab;
     public GameObject redPrefab;
     public GameObject greenPrefab;
@@ -24,9 +26,14 @@ public class PlayerScript : MonoBehaviour
     AudioSource audioSrc;
     public AudioClip pointSound;
     static bool gameStarted = false;
+    static bool gamePaused = true;
     private int ballsCount = 0;
     private int blocksCount = 0;
-
+    private bool showGUI = false;
+    public InputField inputField;
+    public Text StartTextButton;
+    public Text Records;
+    public Text NewRecord;
     private void SetBackground()
     {
         var bg = GameObject.Find("Background").GetComponent<Image>();
@@ -44,9 +51,9 @@ public class PlayerScript : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            for (int k  = 0; k < 20; k++)
+            for (int k = 0; k < 20; k++)
             {
-                var obj = Instantiate(prefab, new Vector3((Random.value * 2 - 1)* xMax, Random.value*yMax, 0), Quaternion.identity);
+                var obj = Instantiate(prefab, new Vector3((Random.value * 2 - 1) * xMax, Random.value * yMax, 0), Quaternion.identity);
                 if (obj.GetComponent<Collider2D>().OverlapCollider(contactFilter.NoFilter(), colliders) == 0)
                     break;
                 Destroy(obj);
@@ -60,12 +67,12 @@ public class PlayerScript : MonoBehaviour
         if (gameData.balls == 1)
             count = 1;
         ballsCount = count;
-        for (int i = 0;i < count;i++)
+        for (int i = 0; i < count; i++)
         {
             var obj = Instantiate(ballPrefab);
             var ball = obj.GetComponent<BallScript>();
-            ball.ballInitialForce += new Vector2(10*i, 0);
-            ball.ballInitialForce *= 1 + level*ballVelocityMult;
+            ball.ballInitialForce += new Vector2(10 * i, 0);
+            ball.ballInitialForce *= 1 + level * ballVelocityMult;
         }
     }
 
@@ -73,17 +80,30 @@ public class PlayerScript : MonoBehaviour
     {
         gameData.ResetStickyPlayer();
         gameData.ResetPlayerSize();
+
+        gameStarted = true;
+
+        Debug.Log("Level started");
+
         SetBackground();
         var yMax = 4.3f;
         var xMax = 5.5f;
+
         CreateBlocks(bluePrefab, xMax, yMax, level, 8);
         CreateBlocks(redPrefab, xMax, yMax, 1 + level, 10);
         CreateBlocks(greenPrefab, xMax, yMax, 1 + level, 12);
         CreateBlocks(yellowPrefab, xMax, yMax, 2 + level, 15);
         CreateBlocks(SpecialYellowPrefab, xMax, yMax, 2 + level, 15);
         CreateBalls();
+
+        if (gameData.level > 1)
+        {
+            ChangeMenuState();
+        }
+
         if (gameData.resetOnStart)
         {
+            this.StartTextButton.text = "Start";
             gameData.Reset();
         }
     }
@@ -100,14 +120,18 @@ public class PlayerScript : MonoBehaviour
         else
         {
             // Check recordin new record. If record in top 5, then return True.
-            gameData.NewResult(gameData.points);
-
+            Cursor.visible = true;
+            if (gameData.NewResult(gameData.points, gameData.username))
+                gameData.newRecord = true;
+            gameStarted = false;
+            gameData.username = "";
+            StartTextButton.text = "Start";
             gameData.Reset();
             SceneManager.LoadScene("MainScene");
         }
     }
 
-    int requiredPointsToBall { get { return 400 + (level - 1)*20; } }
+    int requiredPointsToBall { get { return 400 + (level - 1) * 20; } }
 
     IEnumerator BlockDestroyedCoroutine()
     {
@@ -134,6 +158,7 @@ public class PlayerScript : MonoBehaviour
                 StartCoroutine(BlockDestroyedCoroutine());
 
         }
+
         if (blocksCount == 0)
         {
             if (level < maxLevel)
@@ -157,28 +182,100 @@ public class PlayerScript : MonoBehaviour
 
     float clamp(float x, float max, float min)
     {
-        if (x>min && x<max) return x;
-        if (x<min) return min;
+        if (x > min && x < max) return x;
+        if (x < min) return min;
         return max;
     }
+    public void OnStartButtonClick()
+    {
+        Debug.Log("Start from button");
+
+        NewRecord.gameObject.SetActive(false);
+        if (!string.IsNullOrEmpty(inputField.text))
+        {
+            gameData.username = inputField.text;
+
+            if (!gameStarted)
+            {
+                gameStarted = true;
+                gamePaused = false;
+                StartLevel();
+            }
+            this.StartTextButton.text = "Continue";
+            ChangeMenuState();
+
+        }
+        else
+        {
+            inputField.placeholder.GetComponent<Text>().text = "Really enter name, please";
+            inputField.Select();
+        }
+
+    }
+    public void OnExitButtonClick()
+    {
+        StartTextButton.text = "Start";
+        gameData.Reset();
+        Application.Quit();
+       
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+
+    }
+    public void OnNewGameClick()
+    {
+
+        gameStarted = false;
+        gameData.username = "";
+        StartTextButton.text = "Start";
+        gameData.Reset();
+        SceneManager.LoadScene("MainScene");
+
+    }
+
 
     void Start()
     {
-        audioSrc = Camera.main.GetComponent<AudioSource>();
-        Cursor.visible = false;
-        if (!gameStarted)
+
+        Debug.Log("General Start");
+        if (gameData.newRecord)
         {
-            gameStarted = true;
-            if (gameData.resetOnStart)
-                gameData.Load();
+            NewRecord.gameObject.SetActive(true);
         }
+        else
+        {
+            NewRecord.gameObject.SetActive(false);
+        }
+        gameData.newRecord = false;
+        audioSrc = Camera.main.GetComponent<AudioSource>();
+
+        Time.timeScale = 0;
+
+        if (!string.IsNullOrEmpty(gameData.username))
+        {
+            inputField.text = gameData.username;
+        }
+
+        mainMenu.sortingOrder = 1;
+
+        for (int i = 0; i < gameData.bestResults.list.Count; i++)
+        {
+            Records.text += gameData.bestResults.list[i].playerName + " - " + gameData.bestResults.list[i].recordValue + '\n';
+        }
+
         level = gameData.level;
         SetMusic();
-        StartLevel();
-    }
 
+        if (gameData.level > 1)
+        {
+            StartLevel();
+        }
+
+    }
     void Update()
     {
+
         if (Time.timeScale > 0)
         {
             var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -186,34 +283,43 @@ public class PlayerScript : MonoBehaviour
             pos.x = clamp(mousePos.x, 6.6f, -6.6f);
             transform.position = pos;
         }
-            
-        if (Input.GetKeyDown(KeyCode.M))
+
+        if (Input.GetKeyDown(KeyCode.M) && gameStarted && !gamePaused)
         {
             gameData.music = !gameData.music;
             SetMusic();
         }
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S) && gameStarted && !gamePaused)
         {
             gameData.sound = !gameData.sound;
         }
-        if (Input.GetButtonDown("Cancel"))
+
+        if (Input.GetKeyDown(KeyCode.Escape) && gameStarted)
         {
-            if(Time.timeScale > 0)
-                Time.timeScale = 0;
-            else
-                Time.timeScale = 1;
+
+            ChangeMenuState();
         }
-        if (Input.GetKeyDown(KeyCode.N))
+    }
+    public void ChangeMenuState()
+    {
+
+        Debug.Log("Show Menu");
+
+        mainMenu.GetComponent<Canvas>().enabled = !mainMenu.GetComponent<Canvas>().enabled;
+        //mainMenu.sortingOrder = mainMenu.sortingOrder * -1;
+        if (Time.timeScale > 0)
         {
-            gameData.Reset();
-            SceneManager.LoadScene("MainScene");
+            gamePaused = true;
+            Cursor.visible = true;
+            this.showGUI = false;
+            Time.timeScale = 0;
         }
-        if (Input.GetKeyDown(KeyCode.Escape))
+        else
         {
-            Application.Quit();
-            #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-            #endif
+            gamePaused = false;
+            Cursor.visible = false;
+            this.showGUI = true;
+            Time.timeScale = 1;
         }
     }
 
@@ -229,18 +335,21 @@ public class PlayerScript : MonoBehaviour
 
     private void OnGUI()
     {
-        GUI.Label(new Rect(0 + Mathf.Floor((Screen.width - Screen.height/3*4)/2) + 5, 2, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height/3*4)/2), 100), string.Format("<color=yellow><size=18>Level <b>{0}</b>    Balls <b>{1}</b>" + "   Score <b>{2}</b></size></color>", gameData.level, gameData.balls, gameData.points));
-        GUIStyle style = new GUIStyle();
-        style.alignment = TextAnchor.UpperRight;
-        GUI.Label(new Rect(5, 6, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height/3*4)/2), 100),
-        string.Format(
-            "<color=yellow><size=12><color=white>Space</color>-pause {0}" +
-             " <color=white>N</color>-new" +
-             " <color=white>J</color>-jump" +
-             " <color=white>M</color>-music {1}" +
-             " <color=white>S</color>-sound {2}" +
-             " <color=white>Esc</color>-exit</size></color>",
-             OnOff(Time.timeScale > 0), OnOff(!gameData.music),
-             OnOff(!gameData.sound)), style);
+        if (showGUI)
+        {
+            GUI.Label(new Rect(0 + Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2) + 5, 2, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2), 100), string.Format("<color=yellow><size=18>Player <b>{0}</b>    Level <b>{1}</b>    Balls <b>{2}</b>" + "   Score <b>{3}</b></size></color>", gameData.username, gameData.level, gameData.balls, gameData.points));
+
+            GUIStyle style = new GUIStyle();
+            style.alignment = TextAnchor.UpperRight;
+            GUI.Label(new Rect(5, 6, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2), 100),
+                string.Format(
+                    "<color=yellow><size=12>" +
+                    " <color=white>J</color>-jump" +
+                    " <color=white>M</color>-music {1}" +
+                    " <color=white>S</color>-sound {2}" +
+                    " <color=white>Esc</color>-menu</size></color>",
+                    OnOff(Time.timeScale > 0), OnOff(!gameData.music),
+                    OnOff(!gameData.sound)), style);
+        }
     }
 }
