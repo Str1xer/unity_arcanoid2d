@@ -23,6 +23,7 @@ public class GameDataScript : ScriptableObject
     }
 
     public string username = "";
+    public bool newRecord = false;
     public bool resetOnStart;
     public bool music = true;
     public bool sound = true;
@@ -115,6 +116,7 @@ public class GameDataScript : ScriptableObject
         balls = 6;  
         points = 0;
         pointsToBall = 0;
+        username = string.Empty;
         if (resetOnStart)
             bestResults = new SerializableList<Record>();
     }

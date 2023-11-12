@@ -31,6 +31,7 @@ public class PlayerScript : MonoBehaviour
     private int blocksCount = 0;
     private bool showGUI = false;
     public InputField inputField;
+    public Text StartTextButton;
     public Text Records;
     public Text NewRecord;
     private void SetBackground()
@@ -102,6 +103,7 @@ public class PlayerScript : MonoBehaviour
 
         if (gameData.resetOnStart)
         {
+            this.StartTextButton.text = "Start";
             gameData.Reset();
         }
     }
@@ -120,9 +122,10 @@ public class PlayerScript : MonoBehaviour
             // Check recordin new record. If record in top 5, then return True.
             Cursor.visible = true;
             if (gameData.NewResult(gameData.points, gameData.username))
-                NewRecord.gameObject.SetActive(true);  
+                gameData.newRecord = true;
             gameStarted = false;
             gameData.username = "";
+            StartTextButton.text = "Start";
             gameData.Reset();
             SceneManager.LoadScene("MainScene");
         }
@@ -198,6 +201,7 @@ public class PlayerScript : MonoBehaviour
                 gamePaused = false;
                 StartLevel();
             }
+            this.StartTextButton.text = "Continue";
             ChangeMenuState();
 
         }
@@ -210,21 +214,42 @@ public class PlayerScript : MonoBehaviour
     }
     public void OnExitButtonClick()
     {
+        StartTextButton.text = "Start";
+        gameData.Reset();
         Application.Quit();
-        #if UNITY_EDITOR
+       
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+#endif
 
     }
+    public void OnNewGameClick()
+    {
+
+        gameStarted = false;
+        gameData.username = "";
+        this.StartTextButton.text = "Continue";
+        gameData.Reset();
+        SceneManager.LoadScene("MainScene");
+
+    }
+
 
     void Start()
     {
 
         Debug.Log("General Start");
-
-        NewRecord.gameObject.SetActive(false);
+        if (gameData.newRecord)
+        {
+            NewRecord.gameObject.SetActive(true);
+        }
+        else
+        {
+            NewRecord.gameObject.SetActive(false);
+        }
+        gameData.newRecord = false;
         audioSrc = Camera.main.GetComponent<AudioSource>();
-   
+
         Time.timeScale = 0;
 
         if (!string.IsNullOrEmpty(gameData.username))
@@ -268,23 +293,10 @@ public class PlayerScript : MonoBehaviour
         {
             gameData.sound = !gameData.sound;
         }
-        if (Input.GetButtonDown("Cancel") && gameStarted && !gamePaused)
-        {
-            if (Time.timeScale > 0)
-                Time.timeScale = 0;
-            else
-                Time.timeScale = 1;
-        }
-        if (Input.GetKeyDown(KeyCode.N) && gameStarted && !gamePaused)
-        {
-            gameStarted = false;
-            gameData.username = "";
-            gameData.Reset();
-            SceneManager.LoadScene("MainScene");
-        }
+
         if (Input.GetKeyDown(KeyCode.Escape) && gameStarted)
         {
-            
+
             ChangeMenuState();
         }
     }
@@ -330,8 +342,7 @@ public class PlayerScript : MonoBehaviour
             style.alignment = TextAnchor.UpperRight;
             GUI.Label(new Rect(5, 6, Screen.width - 10 - Mathf.Floor((Screen.width - Screen.height / 3 * 4) / 2), 100),
                 string.Format(
-                    "<color=yellow><size=12><color=white>Space</color>-pause {0}" +
-                    " <color=white>N</color>-new" +
+                    "<color=yellow><size=12>" +
                     " <color=white>J</color>-jump" +
                     " <color=white>M</color>-music {1}" +
                     " <color=white>S</color>-sound {2}" +
