@@ -305,7 +305,8 @@ public class PlayerScript : MonoBehaviour
 
         Debug.Log("Show Menu");
 
-        mainMenu.sortingOrder = mainMenu.sortingOrder * -1;
+        mainMenu.GetComponent<Canvas>().enabled = !mainMenu.GetComponent<Canvas>().enabled;
+        //mainMenu.sortingOrder = mainMenu.sortingOrder * -1;
         if (Time.timeScale > 0)
         {
             gamePaused = true;

@@ -32,13 +32,19 @@ public class BallScript : MonoBehaviour
         { 
             if (Input.GetButtonDown("Fire1"))
             {
-                rb.isKinematic = false;
-                rb.AddForce(ballInitialForce);
+                var pos = transform.position;
+                if (pos.x < 6.25f) {
+                    rb.isKinematic = false;
+                    rb.AddForce(ballInitialForce);
+
+                    Invoke("setHasStickyBasllToFalse", 0.5f);
+                }
+                
                 // Hach for case when we have already have a sticky ball
                 // and when we click and expect that ball will be thrown, 
                 // but because ball is close to player unity will trigger
                 // [OnCollisionEnter2D] and we will not throw a ball
-                Invoke("setHasStickyBasllToFalse", 0.5f);
+                
             } 
             else
             {
